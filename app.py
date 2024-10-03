@@ -19,11 +19,11 @@ async def convert_pinyin(input: TextInput):
     bopomofo_result = pinyin(text, style=Style.BOPOMOFO)
 
     return {
-        "wei-toma": wade_giles,
-        "hanyu": hanyu_pinyin,
-        "tong-yong": pinyin_result,
-        "zhuyin": bopomofo_result
+        "wei_toma": [p.upper() for p in wade_giles],  # 威妥瑪拼音大寫
+        "hanyu": [p.upper() for p in hanyu_pinyin],    # 漢語拼音大寫
+        "tong_yong": [p.upper() for p in pinyin_result], # 通用拼音大寫
+        "zhuyin": bopomofo_result  # 注音保持不變
     }
 
 # Run the application using: uvicorn filename:app --reload
-# Example: uvicorn app:app --host 127.0.0.1 --port 8080 &
+# Example: uvicorn app:app --host 127.0.0.1 --port 8080 --reload &
