@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from pydantic import BaseModel
-from pypinyin import pinyin, lazy_pinyin, Style
+from pypinyin import pinyin, Style
+import re
 
 # Define the request body model
 class TextInput(BaseModel):
@@ -9,20 +10,22 @@ class TextInput(BaseModel):
 # Initialize FastAPI app
 app = FastAPI()
 
+# 正則表達式來去除聲調符號
+def remove_tone(bopomofo):
+    return re.sub(r'[ˊˇˋ˙]', '', bopomofo)
+
 @app.post("/convert")
 async def convert_pinyin(input: TextInput):
     text = input.text
 
-    wade_giles = lazy_pinyin(text, style=Style.WADEGILES)
-    hanyu_pinyin = lazy_pinyin(text, style=Style.NORMAL)
-    pinyin_result = lazy_pinyin(text)
+    # 生成帶聲調的注音
     bopomofo_result = pinyin(text, style=Style.BOPOMOFO)
 
+    # 去掉聲調符號
+    bopomofo_no_tone = [''.join(remove_tone(b) for b in bopomofo) for bopomofo in bopomofo_result]
+
     return {
-        "wei_toma": [p.upper() for p in wade_giles],  # 威妥瑪拼音大寫
-        "hanyu": [p.upper() for p in hanyu_pinyin],    # 漢語拼音大寫
-        "tong_yong": [p.upper() for p in pinyin_result], # 通用拼音大寫
-        "zhuyin": bopomofo_result  # 注音保持不變
+        "zhuyin": bopomofo_no_tone  # 注音去掉聲調
     }
 
 # Run the application using: uvicorn filename:app --reload
